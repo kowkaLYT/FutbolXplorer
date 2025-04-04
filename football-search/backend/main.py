@@ -20,57 +20,58 @@ def search_team(name):
     return None
 
 
-def show_teams(teams):
+def choose_team(teams):
     if not teams:
-        print("Команда не знайдена.")
-        return
+        print("Команд не знайдено.")
+        return None
+    print("\nЗнайдено команди:")
 
     team_data = []
-    for team in teams:
-        info, venue = team["team"], team.get("venue", {})
-        team_data.append(
-            [
-                info["id"],
-                info["name"],
-                info.get("code", "Невідомо"),
-                info["country"],
-                venue.get("city", "Невідомо"),
-                info.get("founded", "Невідомо"),
-                venue.get("name", "Невідомо"),
-                venue.get("capacity", "Невідомо"),
-                venue.get("surface", "Невідомо"),
-                info["logo"],
-            ]
-        )
+    for idx, team in enumerate(teams, start=1):
+        name = team["team"]["name"]
+        country = team["team"]["country"]
+        city = team.get("venue", {}).get("city", "Невідомо")
+        team_data.append([idx, name, country, city])
 
-    df = pd.DataFrame(
-        team_data,
-        columns=[
-            "ID",
-            "Назва",
-            "Код",
-            "Країна",
-            "Місто",
-            "Рік заснування",
-            "Стадіон",
-            "Місткість стадіону",
-            "Тип покриття",
-            "Логотип",
-        ],
-    )
-    df = df.fillna("Невідомо")
+    df = pd.DataFrame(team_data, columns=["№", "Назва", "Країна", "Місто"])
     print(df)
+    while True:
+        try:
+            choice = int(input("Виберіть номер команди: "))
+            if 1 <= choice <= len(teams):
+                return teams[choice - 1]
+            else:
+                print("Некоректний номер.")
+        except ValueError:
+            print("Введіть число.")
+
+
+def show_team_details(team):
+    info = team["team"]
+    venue = team.get("venue", {})
+
+    print("\n=== Детальна інформація про команду ===")
+    print(f"Назва: {info['name']}")
+    print(f"Код: {info.get('code', 'Невідомо')}")
+    print(f"Країна: {info['country']}")
+    print(f"Місто: {venue.get('city', 'Невідомо')}")
+    print(f"Рік заснування: {info.get('founded', 'Невідомо')}")
+    print(f"Стадіон: {venue.get('name', 'Невідомо')}")
+    print(f"Місткість: {venue.get('capacity', 'Невідомо')}")
+    print(f"Покриття: {venue.get('surface', 'Невідомо')}")
+    print(f"Логотип: {info['logo']}")
 
 
 def main():
-    search_query = input("Введіть ім'я команди: ").strip()
-    team_result = search_team(search_query)
+    search_option = input("Введіть ім'я команди: ").strip()
+    team_result = search_team(search_option)
 
     if team_result:
-        print("\nКоманда знайдена:")
-        show_teams(team_result)
+        selected_team = choose_team(team_result)
+        if selected_team:
+            show_team_details(selected_team)
     else:
-        print("Команда не знайдена.")
+        print("Команду не знайдено.")
 
 
 if __name__ == "__main__":
